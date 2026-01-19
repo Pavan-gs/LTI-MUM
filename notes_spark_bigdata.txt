@@ -1,0 +1,193 @@
+1990's --> GPS, www, personal computers
+
+Traditional --> RDBMS
+
+Volume --> Cost of data storage, license, high-end servers
+Velocity --> speed of data generation 
+Variety --> structured
+
+Hadoop
+======
+Opensource framework to store, process and manage Big data
+Commodity h/w
+
+hadoop cluster --> group of computers connected, hadoop s/w is running
+
+HDFS --> distributed file system --storage
+Mapreduce/YARN --> Distributed parallel algorithm --> Java
+
+300 mb --> fs --> 128 mb, 128 mb, 44 mb
+Name node (master) --> give list of data nodes (slaves) to store blocks
+
+b1(1st row 5th machine) , b1 r2 --> (1st row, 2nd machine), 
+b1r3(2nd row,7th machine)
+b2(2nd row 3rd machine)
+b3(3rd row 8th machine)
+
+Replication factor --> 3
+b1 b2 b3
+m1 (5), m2(15), m3(30) --> reduce (50)
+
+Yahoo --> PIG
+FB --> HIVE (DWH) --> HQL
+
+*-------------------------------------------------------------------------------------*
+Spark --> Unified, in-memory [RAM] cluster computing framework 
+[written in Scala (functional programming language)] --> 
+100 times faster than YARN (in-memory) 
+10 times faster than YARN (in disc)
+
+Unified platform 
+==============
+Complex programming logic (RDD syntax to write programs) using Scala, 
+Python, Java, R
+Dataframes
+spark sql
+spark ml, mllib
+spark streaming 
+graph
+
+Run anywhere
+============
+HDFS, Apache mesos, AWS S3, Azure blob storage
+
+Main abstraction of Spark
+==========================
+Spark RDD (Resilient Distributed Datasets) --> Logical Split of the data
+
+RDD --> MAIN ABSTRATCTION, DISTRIBUTED DATASETS LOADED 
+INTO RAM (on-heap/executor memory) ,FURTHER PARTITONED (parallelism) --> coalesce(no shuffles)
+repartition(shuffling)
+
+RDD SYNTAX
+==========
+Complex programming logic, no schema, 
+no optimization
+
+Spark context --> RDD syntax
+RDD's are immutable
+Cannot enforce/infer schema
+
+Lazy evalution
+============
+Transformations --> The functions or business logic --> 
+Upon applying a transformation
+spark creates a logical plan of execution 
+(Directed Acyclic Graphs [DAG's])
+
+Actions --> Actual execution of the logical plan
+
+Narrow Transformations --> Doesn't require shuffling
+Wide Transformations --> requires shuffling
+
+Shared Variables --> Variables that has to be shared among different RDD's 
+
+Accumulators
+Broadcasters
+
+On-heap/Executor memory --> Deserialised format(good for processing, not for storage)
+shuffling, sorting, joining
+off-heap/storage memory --> Serialized (cost efficient storage but processing is costly),No GC overhead 
+
+Spark Persistance  --> Save the execution state
+Caching --> (off-heap)
+Persist (off-heap+disc)
+
+Spark's Dataframe
+=================
+Can enforce/infer schema
+Optimizer (Catalyst--> tungsten)
+Compile time safety
+
+Row oriented data --> row objects
+Column orieted data --> column format (predicate pushdown, vectorisation)
+
+Spark context --> Spark Session --> Dataframe syntax
+
+Spark's Pandas API
+==================
+Same as Pandas, Partial optimization
+
+UDF's are not ideal as they donot support predicate pushdown, vectorisation and serialisation overhead
+
+Coalesce --> Only merges existing partitions and only decrement
+Repartition --> Shuffles and can increase or decrease the number of partitions(costly)
+
+Spark SQL dataframes
+
+'''Spark MLlib --> RDD's (outdated)
+Spark ML --> Spark Dataframes'''
+
+Spark Streaming
+
+Kafka
+
+Pyspark
+-----------
+RDD syntax  --> Spark Context
+Dataframes --> Spark Session --> Spark context, streaming context, sql context
+Datasets --> Not available for Python/Java
+
+
+RDD's exposes API's called as Transformations and Actions
+
+Transformations : Takes one RDD as input and produce another RDD as output
+
+1. Row level transformations : Map, Filter, Flatmap, map partition, map partition with index
+
+2. Aggregations : Reduce bykey,aggregate bykey
+
+3. Joins
+
+4. Ranking: groupbykey
+
+Actions : They produce the final output to the driver program
+
+1. Preview --> Take,Sample,top
+
+2. Collect
+
+3. Reduce
+
+4. Saveastext,saveasseq
+
+# Directed Acyclic Graphs : 
+
+# Dag Scheduler : It completes the computation and execution of stages for a job. Tracks the RDD's--> Assign task to task scheduler
+
+# Task scheduler ( Submitting tasks for execution)
+
+# DAG process:
+
+1. User submits an apache spark application
+
+2. The driver module takes the application (Spark context is set-up)
+
+3. Driver identify transformations & Actions required
+
+4. Creates a logical flow of operations (DAG)
+
+5. Dag is converted into Physical execution plan ( Stages )
+
+6. Then the tasks are sent to the cluster with the help of DAG scheduler
+
+
+Parquet file format
+-------------------------
+Compressed columnar file format
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
