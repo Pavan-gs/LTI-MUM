@@ -1,0 +1,10 @@
+Access data from adls to az databricks
+
+1. Access Keys
+2. SAS
+3. Service principal (Mounting)
+4. Modern AZDB (Unity catalog--> volumes)
+	1. Create a az databricks connector
+	1. Storage contributor role to connector
+	3. Create a storage credential &
+ external location from bricks 
