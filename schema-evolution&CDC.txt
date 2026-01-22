@@ -1,0 +1,98 @@
+CREATE CATALOG IF NOT EXISTS uc_training_media;
+CREATE SCHEMA IF NOT EXISTS uc_training_media.content_ops;
+
+CREATE VOLUME IF NOT EXISTS uc_training_media.content_ops.raw_viewing_vol;
+
+from pyspark.sql.functions import col, when, lit
+
+df_raw = (
+    spark.read
+    .option("header", True)
+    .option("inferSchema", True)
+    .csv("/Volumes/uc_training_media/content_ops/raw_viewing_vol/medium_media_viewing_metrics.csv")
+)
+
+df_raw.printSchema()
+df_raw.filter(col("watch_minutes").isNull()).show()
+
+
+df_clean = (
+    df_raw
+    .filter(col("watch_minutes").isNotNull())
+    .withColumn(
+        "engagement_level",
+        when(col("completion_rate") >= 0.9, "HIGH").otherwise("NORMAL")
+    )
+)
+
+df_clean.show()
+
+
+df_clean.write \
+    .mode("overwrite") \
+    .format("delta") \
+    .saveAsTable("uc_training_media.content_ops.viewing_metrics_silver")
+
+
+df_v2 = df_clean.withColumn("ingestion_batch", lit("batch_01"))
+
+df_v2.write \
+    .mode("append") \
+    .option("mergeSchema", "true") \
+    .format("delta") \
+    .saveAsTable("uc_training_media.content_ops.viewing_metrics_silver")
+
+
+-- Current version
+SELECT COUNT(*) FROM uc_training_media.content_ops.viewing_metrics_silver;
+
+-- Previous version (before schema evolution)
+SELECT COUNT(*)
+FROM uc_training_media.content_ops.viewing_metrics_silver VERSION AS OF 0;
+
+
+DESCRIBE TABLE uc_training_media.content_ops.viewing_metrics_silver VERSION AS OF 0;
+
+OPTIMIZE uc_training_media.content_ops.viewing_metrics_silver
+ZORDER BY (genre);
+
+
+DESCRIBE HISTORY uc_training_media.content_ops.viewing_metrics_silver;
+
+
+ALTER TABLE uc_training_media.content_ops.viewing_metrics_silver
+SET TBLPROPERTIES (delta.enableChangeDataFeed = true);
+
+
+UPDATE uc_training_media.content_ops.viewing_metrics_silver
+SET ad_revenue = ad_revenue + 2
+WHERE event_id = 'E9002';
+
+
+SELECT *
+FROM table_changes(
+  'uc_training_media.content_ops.viewing_metrics_silver',
+  1,
+  10
+);
+
+
+USE CATALOG uc_training_media;
+USE SCHEMA content_ops;
+
+-- Total watch time by genre
+SELECT genre, SUM(watch_minutes) AS total_watch_minutes
+FROM viewing_metrics_silver
+GROUP BY genre;
+
+-- Avg completion rate by subscription tier
+SELECT subscription_tier, AVG(completion_rate) AS avg_completion_rate
+FROM viewing_metrics_silver
+GROUP BY subscription_tier;
+
+
+
+
+
+
+
