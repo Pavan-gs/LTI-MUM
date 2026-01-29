@@ -12,16 +12,17 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "rg-terraform-demo"
-  location = "East US"
+  name     = "rg-terraform-pvn1"
+  location = "west us"
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "vnet-demo"
+  name                = "vnet-pvn"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 }
+
 
 resource "azurerm_subnet" "subnet" {
   name                 = "subnet-demo"
@@ -46,7 +47,10 @@ resource "azurerm_linux_virtual_machine" "vm" {
   name                = "vm-terraform-demo"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  size                = "Standard_B1s"
+  size                = "Standard_D2s_v3"
+ # Standard_D2s_v3, 
+ # Standard_DS1_v2, Standard_B2s, 
+ # az vm list-skus --location westus --size Standard_D2s_v3 --output table
 
   admin_username = "azureuser"
   admin_password = "Password@1234"
@@ -55,6 +59,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
   network_interface_ids = [
     azurerm_network_interface.nic.id
   ]
+
+  custom_data = base64encode(file("mysql-install.sh"))
 
   os_disk {
     caching              = "ReadWrite"
@@ -68,3 +74,5 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = "latest"
   }
 }
+
+# mysql -u demo_user -p
